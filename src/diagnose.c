@@ -73,10 +73,15 @@ void board_diagnose(void) {
   else lcd_puts_P(PSTR("BAD"));
 
   lcd_locate(0, 2); lcd_puts_P(PSTR("PWM:"));
+  
+#if CONFIG_HARDWARE_VARIANT != HW_PETSDLITE
   int16_t res = i2c_read_register(I2C_SLAVE_ADDRESS, I2C_SOFTWARE_VERSION);
+  
   if (res < 0) lcd_puts_P(PSTR("--"));
   else lcd_printf("%02X", res);
-
+#else
+  lcd_puts_P(PSTR("--"));
+#endif
   for (;;) {
     if (counter & 4) {
       PORTD |=  _BV(PD1); set_dirty_led(0);

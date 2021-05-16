@@ -1330,9 +1330,6 @@ static inline uint8_t device_hw_address(void) {
 #  define SOFTI2C_BIT_SDA       PC1
 #  define SOFTI2C_DELAY         6
 
-// Definitions for I2C PWM slave on petSD+ 2.x boards
-#  include                      "i2c-lcd-pwm-io-config.h"
-
 #  define LCD_PORT_E            PORTD
 #  define LCD_DDR_E             DDRD
 #  define LCD_PIN_E             PD4
@@ -1385,7 +1382,6 @@ static inline void ieee_interface_init(void) {
   IEEE_PORT_IFC |= IEEE_BIT_IFC;                    // Enable pull-up for IFC
   IEEE_DDR_ATN  &= (uint8_t) ~ _BV(IEEE_PIN_ATN);   // Define ATN as input
   IEEE_DDR_IFC  &= (uint8_t) ~ IEEE_BIT_IFC;        // Define IFC as input
-  i2c_write_register(I2C_SLAVE_ADDRESS, IO_IEC, 1); // Enable IEEE-488 bus
 }
 
 #ifdef CONFIG_HAVE_IEC
