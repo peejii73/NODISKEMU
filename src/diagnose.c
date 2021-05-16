@@ -38,7 +38,7 @@
 
 
 // petSD+ diagnose
-#if (CONFIG_HARDWARE_VARIANT == HW_PETSDPLUS) && defined(CONFIG_ONBOARD_DISPLAY)
+#if ((CONFIG_HARDWARE_VARIANT == HW_PETSDPLUS) || (CONFIG_HARDWARE_VARIANT == HW_PETSDLITE)) && defined(CONFIG_ONBOARD_DISPLAY)
 #include "lcd.h"
 
 void board_diagnose(void) {

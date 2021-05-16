@@ -147,7 +147,7 @@ static FILE mystdout = FDEV_SETUP_STREAM(ioputc, NULL, _FDEV_SETUP_WRITE);
 
 void uart_init(void) {
   /* Configure serial port */
-#if CONFIG_HARDWARE_VARIANT == HW_PETSDPLUS
+#if (CONFIG_HARDWARE_VARIANT == HW_PETSDPLUS) || (CONFIG_HARDWARE_VARIANT == HW_PETSDLITE)
    // petSD+ 38400 baud, 8N1
    // Values taken from http://wormfood.net/avrbaudcalc.php?clock=8%2C16
    UBRRH = 0;
