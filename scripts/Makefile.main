@@ -127,6 +127,11 @@ ifeq ($(CONFIG_RTC_PCF8583),y)
   NEED_I2C := y
 endif
 
+ifeq ($(CONFIG_RTC_PCF8563),y)
+  SRC += rtc.c pcf8563.c
+  NEED_I2C := y
+endif
+
 ifeq ($(CONFIG_RTC_SOFTWARE),y)
   SRC += rtc.c avr/softrtc.c
 endif

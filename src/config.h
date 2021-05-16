@@ -106,6 +106,7 @@ static inline void late_board_init(void) {
 /* ----- Translate CONFIG_RTC_* symbols to HAVE_RTC symbol ----- */
 #if defined(CONFIG_RTC_SOFTWARE) || \
     defined(CONFIG_RTC_PCF8583)  || \
+    defined(CONFIG_RTC_PCF8563)  || \
     defined(CONFIG_RTC_LPC17XX)  || \
     defined(CONFIG_RTC_DSRTC)
 #  define HAVE_RTC
@@ -113,6 +114,7 @@ static inline void late_board_init(void) {
 /* calculate the number of enabled RTCs */
 #  if defined(CONFIG_RTC_SOFTWARE) + \
       defined(CONFIG_RTC_PCF8583)  + \
+      defined(CONFIG_RTC_PCF8563)  + \
       defined(CONFIG_RTC_LPC17XX)  + \
       defined(CONFIG_RTC_DSRTC)  > 1
 #    define NEED_RTCMUX

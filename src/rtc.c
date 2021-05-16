@@ -29,6 +29,7 @@
 #include "config.h"
 #include "ds1307-3231.h"
 #include "pcf8583.h"
+#include "pcf8563.h"
 #include "progmem.h"
 #include "rtc_lpc17xx.h"
 #include "softrtc.h"
