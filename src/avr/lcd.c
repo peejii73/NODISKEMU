@@ -42,7 +42,7 @@
 #include "arch-timer.h"
 #include "i2c.h"
 
-
+#define LCD_ADDR (0x7E)
 #define LCD_DELAY_US_DATA       92
 #define LCD_DELAY_US_E          40
 
@@ -63,6 +63,17 @@ static int lcd_putchar(char c, FILE *stream);
 static FILE lcd_stream = FDEV_SETUP_STREAM(lcd_putchar, NULL, _FDEV_SETUP_WRITE);
 static FILE *lcd_stdout;
 
+#if CONFIG_HARDWARE_VARIANT == HW_PETSDLITE
+typedef struct {
+  uint8_t RS : 1;
+  uint8_t RW : 1;
+  uint8_t E : 1;
+  uint8_t BL : 1;
+  uint8_t D : 4;
+} lcd_data_t;
+
+lcd_data_t lcd_data[3];
+#endif
 
 // avr-libc requires constant delays so we're doing some macro voodoo here
 
@@ -87,7 +98,7 @@ static FILE *lcd_stdout;
 #endif
 
 
-
+#if CONFIG_HARDWARE_VARIANT != HW_PETSDLITE
 static inline void lcd_set_data_mode(void) {
   LCD_PORT_RS |= _BV(LCD_PIN_RS);
 }
@@ -115,7 +126,31 @@ static void lcd_write(uint8_t v) {
   lcd_pulse_e();
   modesafe_delay_us(LCD_DELAY_US_DATA);
 }
+#else
+static inline void lcd_set_data_mode(void) {
+  lcd_data[0].RS = 1;
+  lcd_data[1].RS = 1;
+  lcd_data[2].RS = 1;
+}
 
+
+static inline void lcd_set_command_mode(void) {
+  lcd_data[0].RS = 0;
+  lcd_data[1].RS = 0;
+  lcd_data[2].RS = 0;
+}
+
+static void lcd_write(uint8_t v) {
+  lcd_data[0].D = (v >> 4);
+  lcd_data[1].D = (v >> 4);
+  lcd_data[2].D = (v >> 4);
+  i2c_write_raw(LCD_ADDR, 3, lcd_data);
+  lcd_data[0].D = v;
+  lcd_data[1].D = v;
+  lcd_data[2].D = v;
+  i2c_write_raw(LCD_ADDR, 3, lcd_data);
+}
+#endif
 
 void lcd_send_command(uint8_t cmd) {
   lcd_set_command_mode();
@@ -168,6 +203,7 @@ void lcd_cursor(bool on) {
 
 
 void lcd_init(void) {
+#if CONFIG_HARDWARE_VARIANT != HW_PETSDLITE
   // LCD ports as output
   LCD_DDR_E  |= _BV(LCD_PIN_E);
   LCD_DDR_RS |= _BV(LCD_PIN_RS);
@@ -177,7 +213,6 @@ void lcd_init(void) {
   LCD_PORT_E &= ~_BV(LCD_PIN_E);
   LCD_PORT_RS &= ~_BV(LCD_PIN_RS);
   LCD_PORT_DATA &= 0xF0;
-
 
   modesafe_delay_ms(LCD_DELAY_MS_POWERON);
 
@@ -189,7 +224,32 @@ void lcd_init(void) {
 
   LCD_PORT_DATA &= 0xF2;       // select bus width: 4-bit
   lcd_pulse_e(); modesafe_delay_ms(LCD_DELAY_MS_LONG);
+#else
+  modesafe_delay_ms(LCD_DELAY_MS_POWERON);
+  lcd_data[0].BL = 1;
+  lcd_data[1].BL = 1;
+  lcd_data[2].BL = 1;
+  lcd_data[0].E = 0;
+  lcd_data[1].E = 1;
+  lcd_data[2].E = 0;
 
+  // send init value 0x30 three times
+  lcd_data[0].D = 0x03;
+  lcd_data[1].D = 0x03;
+  lcd_data[2].D = 0x03;
+  i2c_write_raw(LCD_ADDR, 3, lcd_data);
+  modesafe_delay_ms(LCD_DELAY_MS_LONG);
+  i2c_write_raw(LCD_ADDR, 3, lcd_data);
+  modesafe_delay_ms(LCD_DELAY_MS_SHORT);
+  i2c_write_raw(LCD_ADDR, 3, lcd_data);
+  modesafe_delay_ms(LCD_DELAY_MS_SHORT);
+  // select bus width: 4-bit
+  lcd_data[0].D = 0x02;
+  lcd_data[1].D = 0x02;
+  lcd_data[2].D = 0x02;
+  i2c_write_raw(LCD_ADDR, 3, lcd_data);
+  modesafe_delay_ms(LCD_DELAY_MS_LONG);
+#endif
   lcd_write(0x28);             // 4 bit, 2 line, 5x7 dots
   lcd_write(0x0C);             // Display on, cursor off
   lcd_write(0x06);             // Automatic increment, no shift

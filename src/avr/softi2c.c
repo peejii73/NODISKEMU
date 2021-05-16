@@ -155,6 +155,24 @@ uint8_t i2c_write_registers(uint8_t address, uint8_t startreg, uint8_t count, co
   return 0;
 }
 
+#if CONFIG_HARDWARE_VARIANT == HW_PETSDLITE
+/* Returns 1 if there was no ACK to the address */
+uint8_t i2c_write_raw(uint8_t address, uint8_t count, const void *data) {
+  uint8_t i;
+
+  start_condition();
+  if (i2c_send_byte(address)) {
+    stop_condition();
+    return 1;
+  }
+
+  for (i=0;i<count;i++)
+    i2c_send_byte(((uint8_t *)data)[i]);
+  stop_condition();
+  return 0;
+}
+#endif
+
 /* Returns -1 if there was no ACK to the address, register contents otherwise */
 int16_t i2c_read_register(uint8_t address, uint8_t reg) {
   uint8_t val;

@@ -1330,14 +1330,6 @@ static inline uint8_t device_hw_address(void) {
 #  define SOFTI2C_BIT_SDA       PC1
 #  define SOFTI2C_DELAY         6
 
-#  define LCD_PORT_E            PORTD
-#  define LCD_DDR_E             DDRD
-#  define LCD_PIN_E             PD4
-#  define LCD_PORT_RS           PORTD
-#  define LCD_DDR_RS            DDRD
-#  define LCD_PIN_RS            PD3
-#  define LCD_PORT_DATA         PORTB
-#  define LCD_DDR_DATA          DDRB
 #  define LCD_LINES             4
 #  define LCD_COLS              20
 #  define LCD_ADDR_LINE1        0
