@@ -42,7 +42,8 @@
 #include "arch-timer.h"
 #include "i2c.h"
 
-#define LCD_ADDR (0x7E)
+#define LCD_ADDR_8574 (0x4E)
+#define LCD_ADDR_8574A (0x7E)
 #define LCD_DELAY_US_DATA       92
 #define LCD_DELAY_US_E          40
 
@@ -57,7 +58,7 @@ uint8_t lcd_x;                  // 0..LCD_LINES-1
 uint8_t lcd_y;                  // 0..LCD_COLS-1
 uint8_t lcd_contrast = 2;       // Default values which work for me
 uint8_t lcd_brightness = 255;
-
+uint8_t lcd_addr;
 
 static int lcd_putchar(char c, FILE *stream);
 static FILE lcd_stream = FDEV_SETUP_STREAM(lcd_putchar, NULL, _FDEV_SETUP_WRITE);
@@ -144,11 +145,11 @@ static void lcd_write(uint8_t v) {
   lcd_data[0].D = (v >> 4);
   lcd_data[1].D = (v >> 4);
   lcd_data[2].D = (v >> 4);
-  i2c_write_raw(LCD_ADDR, 3, lcd_data);
+  i2c_write_raw(lcd_addr, 3, lcd_data);
   lcd_data[0].D = v;
   lcd_data[1].D = v;
   lcd_data[2].D = v;
-  i2c_write_raw(LCD_ADDR, 3, lcd_data);
+  i2c_write_raw(lcd_addr, 3, lcd_data);
 }
 #endif
 
@@ -237,17 +238,22 @@ void lcd_init(void) {
   lcd_data[0].D = 0x03;
   lcd_data[1].D = 0x03;
   lcd_data[2].D = 0x03;
-  i2c_write_raw(LCD_ADDR, 3, lcd_data);
+  lcd_addr = LCD_ADDR_8574A;
+
+  if (i2c_write_raw(lcd_addr, 3, lcd_data) == 1) {
+    lcd_addr = LCD_ADDR_8574;
+  }
+  i2c_write_raw(lcd_addr, 3, lcd_data);
   modesafe_delay_ms(LCD_DELAY_MS_LONG);
-  i2c_write_raw(LCD_ADDR, 3, lcd_data);
+  i2c_write_raw(lcd_addr, 3, lcd_data);
   modesafe_delay_ms(LCD_DELAY_MS_SHORT);
-  i2c_write_raw(LCD_ADDR, 3, lcd_data);
+  i2c_write_raw(lcd_addr, 3, lcd_data);
   modesafe_delay_ms(LCD_DELAY_MS_SHORT);
   // select bus width: 4-bit
   lcd_data[0].D = 0x02;
   lcd_data[1].D = 0x02;
   lcd_data[2].D = 0x02;
-  i2c_write_raw(LCD_ADDR, 3, lcd_data);
+  i2c_write_raw(lcd_addr, 3, lcd_data);
   modesafe_delay_ms(LCD_DELAY_MS_LONG);
 #endif
   lcd_write(0x28);             // 4 bit, 2 line, 5x7 dots
