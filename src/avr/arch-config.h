@@ -1205,7 +1205,7 @@ static inline uint8_t sdcard_detect(void) {
 }
 
 static inline uint8_t sdcard_wp(void) {
-  return (PIND & _BV(PD6));
+  return 0; // No WP detect
 }
 
 
@@ -1359,10 +1359,13 @@ static inline void late_board_init(void) {
   uint16_t buttons = ADCW;
   if (buttons > 580 && buttons < 630) {
     board_diagnose();
-  } else if (buttons >= 630 && buttons < 680) {
+  }
+#if CONFIG_HARDWARE_VARIANT != HW_PETSDLITE
+  else if (buttons >= 630 && buttons < 680) {
     lcd_set_brightness(0xFF);                       // maximum brightness
     menu_adjust_contrast();
   }
+#endif
 }
 
 #include "i2c.h"

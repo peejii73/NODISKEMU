@@ -460,9 +460,11 @@ static void rom_menu_main(uint8_t y) {
       else
         lcd_printf("Set clock");
       break;
+#if CONFIG_HARDWARE_VARIANT != HW_PETSDLITE
     case 4: lcd_puts_P(PSTR("Select IEC/IEEE-488")); break;
     case 5: lcd_puts_P(PSTR("Adjust LCD contrast")); break;
     case 6: lcd_puts_P(PSTR("Adjust brightness")); break;
+#endif
     default: break;
   }
 }
@@ -728,11 +730,15 @@ cleanup:
   goto reread;
 }
 
+#if CONFIG_HARDWARE_VARIANT == HW_PETSDLITE
+#define MAIN_MENU_LAST_ENTRY 3
+#else
 #ifdef HAVE_DUAL_INTERFACE
 #define MAIN_MENU_LAST_ENTRY 6
 #else
 #define MAIN_MENU_LAST_ENTRY 5
 #endif
+#endif // !CONFIG_HARDWARE_VARIANT == HW_PETSDLITE
 
 bool menu(void) {
   uint8_t mp = 0;
@@ -805,11 +811,14 @@ bool menu(void) {
     if      (mp == 1) menu_browse_files();
     else if (mp == 2) menu_device_number();
     else if (mp == 3) menu_set_clock();
+#if CONFIG_HARDWARE_VARIANT != HW_PETSDLITE
     else if (mp == 4) menu_select_bus();
     else if (mp == 5) menu_adjust_contrast();
     else if (mp == 6) menu_adjust_brightness();
+#endif
     else  break;
     if (current_error != ERROR_OK) break;
+    mp = my = 0;
   }
 
   bus_sleep(false);
@@ -818,6 +827,7 @@ bool menu(void) {
   return old_bus != active_bus;
 }
 
+#if CONFIG_HARDWARE_VARIANT != HW_PETSDLITE
 static void pwm_error(void) {
   lcd_locate(0, LCD_LINES - 2);
   lcd_puts_P(PSTR("Error:PWM controller\nnot found"));
@@ -913,3 +923,4 @@ void menu_adjust_brightness(void) {
   }
   pwm_error();
 }
+#endif // !CONFIG_HARDWARE_VARIANT == HW_PETSDLITE

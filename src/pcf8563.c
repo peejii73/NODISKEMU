@@ -113,7 +113,9 @@ void pcf8563_init(void) {
   if (i2c_write_register(PCF8563_ADDR, REG_CTRL1, CTRL1_START_CLOCK)) {
     uart_puts_P(PSTR(" not found"));
   } else {
-    rtc_state = RTC_OK;
+    uint8_t sec_v;
+    i2c_read_registers(PCF8563_ADDR, REG_V_SEC, 1, &sec_v);
+    rtc_state = sec_v & 0x80 ? RTC_INVALID : RTC_OK;
     i2c_write_register(PCF8563_ADDR, REG_CLKOUT, 0x80); // 32768 Hz out
   }
   uart_putcrlf();
