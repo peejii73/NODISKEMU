@@ -76,7 +76,7 @@ void pcf8563_read(struct tm *time) {
   time->tm_hour = bcd2int(rtc_bytes[REG_HOUR - 2] & 0x3f);
   time->tm_mday = bcd2int(rtc_bytes[REG_DAY - 2] & 0x3f);
   time->tm_wday = bcd2int(rtc_bytes[REG_WDAY - 2] & 0x07);
-  time->tm_mon  = bcd2int(rtc_bytes[REG_C_MONTH - 2] & 0x1f) - 1;
+  time->tm_mon  = bcd2int(rtc_bytes[REG_C_MONTH - 2] & 0x1f);
   time->tm_year = bcd2int(rtc_bytes[REG_YEAR - 2]);
   if (rtc_bytes[REG_C_MONTH - 2] & 0x80)
     time->tm_year += 100;
